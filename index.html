@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Finans | Mimar Paneli</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="login-container">
+        <div class="login-box">
+            <h1>STUDIO<span>FINANS</span></h1>
+            <p>Yönetici Girişi</p>
+            <input type="password" id="password-input" placeholder="Anahtar Şifre">
+            <button onclick="checkLogin()">SİSTEME GİRİŞ</button>
+        </div>
+    </div>
+
+    <div id="main-app" style="display: none;">
+        <header>
+            <div class="logo">STUDIO<span>FINANS</span></div>
+            <button onclick="logout()" class="logout-link">Güvenli Çıkış</button>
+        </header>
+
+        <main>
+            <div class="summary-grid">
+                <div class="card">
+                    <label>Şirket Avans Bakiyesi</label>
+                    <span id="balance-advance">0.00</span><small>TL</small>
+                </div>
+                <div class="card">
+                    <label>Toplam Harcama</label>
+                    <span id="total-spent">0.00</span><small>TL</small>
+                </div>
+                <div class="card highlight">
+                    <label>Aktif Borç Yükü</label>
+                    <span id="total-debt">0.00</span><small>TL</small>
+                </div>
+            </div>
+
+            <div class="main-grid">
+                <section class="form-container">
+                    <h3>YENİ İŞLEM KAYDI</h3>
+                    <div class="form-group">
+                        <select id="entry-type" onchange="toggleFields()">
+                            <option value="expense">Harcama Yapıldı</option>
+                            <option value="advance">Şirketten Avans Alındı</option>
+                            <option value="debt">Borç/Fatura Tanımla</option>
+                        </select>
+
+                        <input type="text" id="desc" placeholder="İşlem Detayı (Örn: X Projesi Parke)">
+                        <input type="number" id="amount" placeholder="Tutar (TL)">
+                        <input type="date" id="entry-date">
+
+                        <div id="expense-details">
+                            <select id="source">
+                                <option value="Şirket Avansı">Kaynak: Şirket Avansı</option>
+                                <option value="Kişisel Para">Kaynak: Kişisel Para</option>
+                            </select>
+                            <select id="method">
+                                <option value="Nakit">Yöntem: Nakit</option>
+                                <option value="Kredi Kartı">Yöntem: Kredi Kartı</option>
+                                <option value="Banka Transferi">Yöntem: EFT/Havale</option>
+                            </select>
+                        </div>
+
+                        <div class="file-upload">
+                            <label for="receipt-img">📸 Fiş veya Dekont Ekle</label>
+                            <input type="file" id="receipt-img" accept="image/*">
+                        </div>
+
+                        <button class="add-btn" onclick="processEntry()">VERİLERİ İŞLE</button>
+                    </div>
+                </section>
+
+                <section class="list-container">
+                    <h3>FİNANSAL AKIŞ</h3>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>TARİH</th>
+                                    <th>TÜR</th>
+                                    <th>DETAY</th>
+                                    <th>FİŞ</th>
+                                    <th>TUTAR</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-list"></tbody>
+                        </table>
+                    </div>
+
+                    <h3 style="margin-top: 50px;">BORÇ & ÖDEME TAKVİMİ</h3>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>DURUM</th>
+                                    <th>VADE</th>
+                                    <th>BORÇ KALEMİ</th>
+                                    <th>TUTAR</th>
+                                </tr>
+                            </thead>
+                            <tbody id="debt-list"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div id="image-modal" onclick="this.style.display='none'">
+        <img id="modal-img" src="" alt="Fiş Önizleme">
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

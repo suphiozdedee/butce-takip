@@ -1,0 +1,138 @@
+:root {
+    --primary: #1a1a1a;
+    --accent: #e17055; /* Mimari Terracotta tonu */
+    --bg: #f9f9f9;
+    --card-bg: #ffffff;
+    --border: #ececec;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg);
+    color: var(--primary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Login Ekranı */
+#login-container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+}
+
+.login-box {
+    background: white;
+    padding: 3rem;
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+}
+
+.login-box h1 { font-weight: 300; letter-spacing: 6px; margin-bottom: 0; }
+.login-box h1 span { color: var(--accent); font-weight: 600; }
+.login-box p { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 3px; color: #aaa; margin-top: 10px; margin-bottom: 2.5rem; }
+
+.login-box input {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 1.2rem;
+    border: 1px solid var(--border);
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.login-box button {
+    width: 100%;
+    padding: 15px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: 0.4s;
+}
+
+.login-box button:hover { background: var(--accent); }
+
+/* İçerik Düzeni */
+header {
+    background: white;
+    padding: 1.5rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+}
+
+.logo { font-weight: 300; letter-spacing: 3px; font-size: 1.1rem; }
+.logo span { font-weight: 600; color: var(--accent); }
+
+main { padding: 3rem 5%; max-width: 1300px; margin: 0 auto; }
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 4rem;
+}
+
+.card {
+    background: white;
+    padding: 2.5rem;
+    border-top: 2px solid var(--primary);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.02);
+}
+
+.card label { display: block; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; color: #999; margin-bottom: 10px; }
+.card span { font-size: 2.2rem; font-weight: 600; }
+.card.highlight { border-top-color: var(--accent); }
+
+.main-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 4rem;
+}
+
+/* Form Tasarımı */
+.form-group { display: flex; flex-direction: column; gap: 1.2rem; }
+input, select { padding: 12px; border: none; border-bottom: 1px solid var(--border); outline: none; transition: 0.3s; }
+input:focus { border-bottom-color: var(--accent); }
+
+.file-upload {
+    padding: 20px;
+    border: 1px dashed #ccc;
+    text-align: center;
+    font-size: 0.75rem;
+    color: #777;
+    cursor: pointer;
+}
+
+.add-btn { padding: 18px; background: var(--primary); color: white; border: none; cursor: pointer; font-weight: 600; margin-top: 10px; }
+
+/* Tablolar */
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 15px 0; font-size: 0.65rem; letter-spacing: 1.5px; color: #bbb; border-bottom: 1px solid var(--border); }
+td { padding: 18px 0; border-bottom: 1px solid #f7f7f7; font-size: 0.85rem; }
+
+.receipt-icon { cursor: pointer; font-size: 1.2rem; opacity: 0.5; }
+.receipt-icon:hover { opacity: 1; }
+
+.late-debt { color: #d63031; font-weight: 600; }
+
+/* Image Modal */
+#image-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+#modal-img { max-width: 90%; max-height: 90%; }
+
+.logout-link { background: none; border: 1px solid #eee; padding: 6px 12px; cursor: pointer; font-size: 0.6rem; }
