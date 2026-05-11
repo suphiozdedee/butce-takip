@@ -1,151 +1,95 @@
-// YAPILANDIRMA
-const APP_PASSWORD = "1234"; // Şifreni buradan değiştir
+const APP_USERNAME = "suphiozdede";
+const APP_PASSWORD = "344363";
+const STORE = { transactions: "sf_transactions_v3", debts: "sf_debts_v3" };
 
-// GİRİŞ MANTIĞI
-function checkLogin() {
-    const pass = document.getElementById('password-input').value;
-    if (pass === APP_PASSWORD) {
-        document.getElementById('login-container').style.display = 'none';
-        document.getElementById('main-app').style.display = 'block';
-        updateUI();
-    } else {
-        alert("Yetkisiz Erişim.");
-    }
+const MY_BANKS = [
+  { id:"yk", bank:"Yapı Kredi", account:"Şahsi Hesap", owner:"SUPHİ ÖZDEDE", branch:"Merter Şubesi", iban:"TR780006701000000049237155", favorite:true },
+  { id:"kt", bank:"Kuveyt Türk", account:"Şahsi Hesap", owner:"SUPHİ ÖZDEDE", branch:"Sefaköy Şubesi", iban:"TR020020500009729921700002", favorite:false },
+  { id:"gm", bank:"Garanti BBVA", account:"Mecidiyeköy Meydan", owner:"SUPHİ ÖZDEDE", branch:"Mecidiyeköy Meydan", iban:"TR940006200035700006874447", favorite:false },
+  { id:"gf", bank:"Garanti BBVA", account:"Florya", owner:"SUPHİ ÖZDEDE", branch:"Florya", iban:"TR230006200040700006607464", favorite:false },
+  { id:"gl", bank:"Garanti BBVA", account:"Libadiye", owner:"SUPHİ ÖZDEDE", branch:"Libadiye", iban:"TR620006200101700006663076", favorite:false }
+];
+
+const CATEGORIES = {
+  expense: ["Market","Yemek","Kahve","Ulaşım","Yakıt","Ev","Kira","Fatura","Giyim","Teknoloji","Sağlık","İş Harcaması","Fuar / Proje","Abonelik","Borç Ödemesi","Diğer"],
+  income: ["Maaş","Avans","Tahsilat","Proje Ödemesi","Müşteri Ödemesi","İade","Ek Gelir","Diğer"],
+  debt: ["Kredi Kartı","Kredi","Kira","Fatura","Vergi","Taksit","Abonelik","Kişisel Borç","İş Borcu","Diğer"]
+};
+const PAGES = { dashboard:["Dashboard","Genel Bakış"], flow:["Para Akışı","Gelir / Gider"], debts:["Borçlar","Ödeme Takibi"], banks:["IBAN Kasası","Banka Hesapları"], reports:["Raporlar","Analiz"] };
+let visibleIbans = new Set();
+let toastTimer;
+
+document.addEventListener("DOMContentLoaded", () => { migrateOldData(); bindEvents(); setInitialDates(); fillSelects(); if(sessionStorage.getItem("sf_login")==="1") showApp(); });
+function bindEvents(){
+  document.getElementById("entry-type").addEventListener("change", () => { fillCategories(); syncDebtDate(); });
+  document.getElementById("search-input")?.addEventListener("input", renderHistory);
+  document.getElementById("type-filter")?.addEventListener("change", renderHistory);
+  document.getElementById("import-file")?.addEventListener("change", importData);
+  ["username-input","password-input"].forEach(id => document.getElementById(id)?.addEventListener("keydown", e => { if(e.key === "Enter") checkLogin(e); }));
 }
-
-function toggleFields() {
-    const type = document.getElementById('entry-type').value;
-    document.getElementById('expense-details').style.display = (type === 'expense') ? 'block' : 'none';
+function checkLogin(event){
+  if(event) event.preventDefault();
+  const u = document.getElementById("username-input").value.trim();
+  const p = document.getElementById("password-input").value;
+  const err = document.getElementById("login-error");
+  err.textContent = "";
+  if(u === APP_USERNAME && p === APP_PASSWORD){ sessionStorage.setItem("sf_login","1"); showApp(); toast("Giriş başarılı."); }
+  else err.textContent = "Kullanıcı adı veya şifre hatalı.";
 }
-
-// VERİ KAYDETME VE OKUMA (Async - Görsel İşleme İçin)
-async function processEntry() {
-    const type = document.getElementById('entry-type').value;
-    const desc = document.getElementById('desc').value;
-    const amount = parseFloat(document.getElementById('amount').value);
-    const date = document.getElementById('entry-date').value;
-    const fileInput = document.getElementById('receipt-img');
-
-    if (!desc || isNaN(amount) || !date) {
-        alert("Lütfen tüm alanları mimari bir disiplinle doldurun.");
-        return;
-    }
-
-    // Görseli Base64'e çevir
-    let imgBase64 = "";
-    if (fileInput.files[0]) {
-        imgBase64 = await convertImage(fileInput.files[0]);
-    }
-
-    const item = { id: Date.now(), type, desc, amount, date, image: imgBase64 };
-
-    if (type === 'expense') {
-        item.source = document.getElementById('source').value;
-        item.method = document.getElementById('method').value;
-        saveToLocal('expenses', item);
-    } else if (type === 'advance') {
-        saveToLocal('advances', item);
-    } else if (type === 'debt') {
-        item.isPaid = false;
-        saveToLocal('debts', item);
-    }
-
-    // Formu temizle
-    document.getElementById('desc').value = '';
-    document.getElementById('amount').value = '';
-    fileInput.value = '';
-    updateUI();
+function showApp(){ document.getElementById("login-container").style.display="none"; document.getElementById("main-app").style.display="grid"; updateUI(); }
+function logout(){ sessionStorage.removeItem("sf_login"); location.reload(); }
+function goPage(page){ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active")); document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active")); document.getElementById(`page-${page}`)?.classList.add("active"); document.querySelector(`[data-page='${page}']`)?.classList.add("active"); document.getElementById("page-title").textContent=PAGES[page][0]; document.getElementById("page-kicker").textContent=PAGES[page][1]; if(page==="reports") renderReports(); }
+function focusEntry(){ goPage("dashboard"); setTimeout(()=>document.getElementById("desc").focus(),80); }
+function read(key){ try{return JSON.parse(localStorage.getItem(key)||"[]")}catch{return[]} }
+function write(key,data){ localStorage.setItem(key, JSON.stringify(data)); }
+function uid(prefix){ return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2,8)}`; }
+function today(){ return new Date().toISOString().slice(0,10); }
+function money(n){ return (Number(n)||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function dateTR(d){ if(!d)return"-"; return new Date(`${d}T12:00:00`).toLocaleDateString("tr-TR",{day:"2-digit",month:"short",year:"numeric"}); }
+function escapeHTML(v){ return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+function normalizeIban(v){ return String(v||"").toUpperCase().replace(/\s+/g,""); }
+function formatIban(v){ return normalizeIban(v).replace(/(.{4})/g,"$1 ").trim(); }
+function maskIban(v){ const clean=normalizeIban(v); return clean.length>8 ? `${clean.slice(0,2)}•••• •••• •••• •••• •••• ${clean.slice(-4)}` : "IBAN kayıtlı"; }
+function daysUntil(d){ return Math.ceil((new Date(`${d}T00:00:00`) - new Date(`${today()}T00:00:00`))/86400000); }
+function sum(list){ return list.reduce((s,i)=>s+(Number(i.amount)||0),0); }
+function setInitialDates(){ ["entry-date","due-date"].forEach(id=>{const el=document.getElementById(id); if(el&&!el.value) el.value=today();}); document.getElementById("current-date").textContent = new Date().toLocaleDateString("tr-TR",{weekday:"long",day:"2-digit",month:"long"}); }
+function fillSelects(){ fillCategories(); const account=document.getElementById("account"); account.innerHTML = ["Nakit","Şahsi","İş","Kredi Kartı",...MY_BANKS.map(b=>`${b.bank} - ${b.account}`)].map(a=>`<option>${escapeHTML(a)}</option>`).join(""); syncDebtDate(); }
+function fillCategories(){ const type=document.getElementById("entry-type").value; document.getElementById("category").innerHTML=(CATEGORIES[type]||CATEGORIES.expense).map(c=>`<option>${escapeHTML(c)}</option>`).join(""); }
+function syncDebtDate(){ document.getElementById("due-date-wrap").style.display = document.getElementById("entry-type").value === "debt" ? "block" : "none"; }
+async function processEntry(event){
+  event.preventDefault();
+  const type=document.getElementById("entry-type").value, desc=document.getElementById("desc").value.trim(), receiver=document.getElementById("receiver").value.trim(), category=document.getElementById("category").value, account=document.getElementById("account").value, amount=Number(document.getElementById("amount").value), date=document.getElementById("entry-date").value, dueDate=document.getElementById("due-date").value, note=document.getElementById("note").value.trim();
+  if(!desc || !amount || amount<=0 || !date){ toast("Başlık, tutar ve tarih zorunlu.","bad"); return; }
+  const image = await imageToBase64(document.getElementById("receipt-img").files[0]);
+  if(type === "debt"){
+    const debts=read(STORE.debts); debts.push({id:uid("debt"),name:desc,receiver,category,account,amount,dueDate:dueDate||date,paid:false,paidAt:null,linkedTransactionId:null,note,image,createdAt:new Date().toISOString()}); write(STORE.debts,debts); toast("Borç / fatura eklendi.","warn");
+  } else {
+    const transactions=read(STORE.transactions); transactions.push({id:uid("txn"),type,desc,receiver,category,account,amount,date,note,image,sourceDebtId:null,createdAt:new Date().toISOString()}); write(STORE.transactions,transactions); toast(type==="income"?"Gelir kaydedildi.":"Gider kaydedildi.");
+  }
+  document.querySelector(".entry-form").reset(); setInitialDates(); fillSelects(); updateUI();
 }
-
-function convertImage(file) {
-    return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(file);
-    });
-}
-
-function saveToLocal(key, data) {
-    const existing = JSON.parse(localStorage.getItem(key) || '[]');
-    existing.push(data);
-    localStorage.setItem(key, JSON.stringify(existing));
-}
-
-function updateUI() {
-    const expenses = JSON.parse(localStorage.getItem('expenses') || '[]');
-    const advances = JSON.parse(localStorage.getItem('advances') || '[]');
-    const debts = JSON.parse(localStorage.getItem('debts') || '[]');
-
-    // Hesaplamalar
-    let totalAdv = advances.reduce((s, i) => s + i.amount, 0);
-    let spentAdv = expenses.filter(e => e.source === 'Şirket Avansı').reduce((s, i) => s + i.amount, 0);
-    let totalSpent = expenses.reduce((s, i) => s + i.amount, 0);
-    let activeDebt = debts.filter(d => !d.isPaid).reduce((s, i) => s + i.amount, 0);
-
-    document.getElementById('balance-advance').innerText = (totalAdv - spentAdv).toFixed(2);
-    document.getElementById('total-spent').innerText = totalSpent.toFixed(2);
-    document.getElementById('total-debt').innerText = activeDebt.toFixed(2);
-
-    renderTables(expenses, advances, debts);
-}
-
-function renderTables(exp, adv, dbt) {
-    const historyBody = document.getElementById('history-list');
-    const debtBody = document.getElementById('debt-list');
-    historyBody.innerHTML = '';
-    debtBody.innerHTML = '';
-
-    const allRecords = [...exp, ...adv].sort((a,b) => new Date(b.date) - new Date(a.date));
-
-    allRecords.forEach(item => {
-        const icon = item.image ? `<span class="receipt-icon" onclick="openPreview('${item.image}')">📄</span>` : '-';
-        const typeLabel = item.type === 'advance' ? 'AVANS' : 'HARCAMA';
-        const detail = item.type === 'advance' ? 'Merkez Ödeme' : `${item.source}`;
-
-        historyBody.innerHTML += `
-            <tr>
-                <td>${item.date}</td>
-                <td style="color:${item.type === 'advance' ? '#27ae60' : '#1a1a1a'}">${typeLabel}</td>
-                <td>${item.desc}<br><small style="color:#aaa">${detail}</small></td>
-                <td>${icon}</td>
-                <td>${item.amount.toFixed(2)} TL</td>
-                <td><button onclick="deleteRecord('${item.type}s', ${item.id})" style="border:none; background:none; cursor:pointer; color:#ccc;">✕</button></td>
-            </tr>
-        `;
-    });
-
-    const today = new Date().toISOString().split('T')[0];
-    dbt.forEach(item => {
-        const isLate = item.date <= today && !item.isPaid;
-        debtBody.innerHTML += `
-            <tr class="${isLate ? 'late-debt' : ''}">
-                <td><input type="checkbox" ${item.isPaid ? 'checked' : ''} onclick="toggleDebt(${item.id})"></td>
-                <td>${item.date} ${isLate ? '⚠️' : ''}</td>
-                <td>${item.desc}</td>
-                <td>${item.amount.toFixed(2)} TL</td>
-            </tr>
-        `;
-    });
-}
-
-function openPreview(src) {
-    document.getElementById('modal-img').src = src;
-    document.getElementById('image-modal').style.display = 'flex';
-}
-
-function toggleDebt(id) {
-    let dbt = JSON.parse(localStorage.getItem('debts'));
-    dbt = dbt.map(i => { if(i.id === id) i.isPaid = !i.isPaid; return i; });
-    localStorage.setItem('debts', JSON.stringify(dbt));
-    updateUI();
-}
-
-function deleteRecord(key, id) {
-    if(!confirm("Bu kaydı kalıcı olarak silmek istiyor musunuz?")) return;
-    let items = JSON.parse(localStorage.getItem(key));
-    items = items.filter(i => i.id !== id);
-    localStorage.setItem(key, JSON.stringify(items));
-    updateUI();
-}
-
-function logout() { location.reload(); }
+function imageToBase64(file){ return new Promise(resolve=>{ if(!file) return resolve(""); const r=new FileReader(); r.onload=e=>{ const img=new Image(); img.onload=()=>{ const max=1200; let w=img.width,h=img.height; if(w>h&&w>max){h=Math.round(h*max/w);w=max}else if(h>max){w=Math.round(w*max/h);h=max} const c=document.createElement("canvas"); c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h); resolve(c.toDataURL("image/jpeg",.72));}; img.onerror=()=>resolve(""); img.src=e.target.result;}; r.onerror=()=>resolve(""); r.readAsDataURL(file); }); }
+function updateUI(){ renderStats(); renderAlerts(); renderRecent(); renderHistory(); renderDebts(); renderBanks(); renderReports(); }
+function getRecords(){ const tx=read(STORE.transactions).map(i=>({...i,collection:"transactions",title:i.desc,displayDate:i.date,sortDate:i.date})); const db=read(STORE.debts).map(i=>({...i,collection:"debts",type:"debt",title:i.name,displayDate:i.dueDate,sortDate:i.dueDate})); return [...tx,...db]; }
+function renderStats(){ const tx=read(STORE.transactions), debts=read(STORE.debts); const income=sum(tx.filter(i=>i.type==="income")), expense=sum(tx.filter(i=>i.type==="expense")), unpaid=sum(debts.filter(i=>!i.paid)), paid=sum(debts.filter(i=>i.paid)), late=debts.filter(i=>!i.paid&&daysUntil(i.dueDate)<0).length; document.getElementById("balance-advance").textContent=money(income-expense); document.getElementById("total-income").textContent=money(income); document.getElementById("total-spent").textContent=money(expense); document.getElementById("total-debt").textContent=money(unpaid); document.getElementById("paid-debt").textContent=`${money(paid)} TL`; document.getElementById("unpaid-debt").textContent=`${money(unpaid)} TL`; document.getElementById("late-count").textContent=late; document.getElementById("late-debt-mini").textContent=late; const next=debts.filter(i=>!i.paid).sort((a,b)=>new Date(a.dueDate)-new Date(b.dueDate))[0]; document.getElementById("next-payment").textContent=next?`${money(next.amount)} TL`:"Yok"; document.getElementById("next-payment-sub").textContent=next?`${dateTR(next.dueDate)} · ${next.name}`:"Kayıt bekleniyor"; }
+function renderAlerts(){ const el=document.getElementById("alert-list"); const items=read(STORE.debts).filter(i=>!i.paid).map(i=>({...i,days:daysUntil(i.dueDate)})).filter(i=>i.days<=7).sort((a,b)=>a.days-b.days); if(!items.length){el.innerHTML='<div class="empty">Yaklaşan ödeme yok.</div>';return} el.innerHTML=items.map(i=>{ const status=dueStatus(i.days); return `<div class="alert-item ${status.extra}"><div class="alert-top"><strong>${escapeHTML(i.name)}</strong><span>${status.text}</span></div><div class="alert-bottom"><span>${escapeHTML(i.receiver||i.category||"-")}</span><strong>${money(i.amount)} TL</strong></div></div>`;}).join(""); }
+function dueStatus(days){ if(days<0)return{text:`${Math.abs(days)} gün gecikti`,cls:"bad",extra:"late"}; if(days===0)return{text:"Bugün",cls:"warn",extra:"today"}; return{text:`${days} gün kaldı`,cls:"warn",extra:"soon"}; }
+function typeMeta(type,paid){ if(type==="income")return{label:"Gelir",cls:"good"}; if(type==="expense")return{label:"Gider",cls:"bad"}; return{label:paid?"Borç / Ödendi":"Borç",cls:paid?"good":"warn"}; }
+function renderRecent(){ const el=document.getElementById("recent-list"); const items=getRecords().sort((a,b)=>new Date(b.sortDate)-new Date(a.sortDate)).slice(0,6); if(!items.length){el.innerHTML='<div class="empty">İlk kaydı hızlı kayıt alanından ekle.</div>';return} el.innerHTML=items.map(i=>{ const cls=i.type==="income"?"positive":i.type==="expense"?"negative":"accent"; const sign=i.type==="income"?"+":i.type==="expense"?"-":""; return `<div class="recent-item"><div><strong>${escapeHTML(i.title)}</strong><small>${dateTR(i.displayDate)} · ${escapeHTML(i.receiver||i.category||"-")}</small></div><strong class="${cls}">${sign}${money(i.amount)} TL</strong></div>`;}).join(""); }
+function renderHistory(){ const el=document.getElementById("history-list"); if(!el)return; const q=(document.getElementById("search-input")?.value||"").toLocaleLowerCase("tr-TR"); const f=document.getElementById("type-filter")?.value||"all"; let items=getRecords(); if(f!=="all")items=items.filter(i=>i.type===f); if(q)items=items.filter(i=>[i.title,i.receiver,i.category,i.account,i.note].join(" ").toLocaleLowerCase("tr-TR").includes(q)); items.sort((a,b)=>new Date(b.sortDate)-new Date(a.sortDate)); if(!items.length){el.innerHTML='<tr><td colspan="8"><div class="empty">Kayıt yok.</div></td></tr>';return} el.innerHTML=items.map(i=>rowHTML(i)).join(""); }
+function rowHTML(i){ const m=typeMeta(i.type,i.paid), cls=i.type==="income"?"positive":i.type==="expense"?"negative":"accent", sign=i.type==="income"?"+":i.type==="expense"?"-":""; return `<tr><td>${dateTR(i.displayDate)}</td><td><span class="table-title">${escapeHTML(i.title)}</span><span class="table-sub">${escapeHTML(i.receiver||"-")}${i.note?" · "+escapeHTML(i.note):""}</span></td><td>${escapeHTML(i.category||"-")}</td><td>${escapeHTML(i.account||"-")}</td><td><span class="pill ${m.cls}">${m.label}</span></td><td>${i.image?`<button class="icon-btn" onclick="showImage('${i.collection}','${i.id}')">📄</button>`:"-"}</td><td class="right ${cls}"><strong>${sign}${money(i.amount)} TL</strong></td><td class="right"><button class="icon-btn" onclick="deleteItem('${i.collection}','${i.id}')">×</button></td></tr>`; }
+function renderDebts(){ const el=document.getElementById("debt-list"); if(!el)return; const items=read(STORE.debts).sort((a,b)=>(a.paid-b.paid)||new Date(a.dueDate)-new Date(b.dueDate)); if(!items.length){el.innerHTML='<tr><td colspan="7"><div class="empty">Borç kaydı yok.</div></td></tr>';return} el.innerHTML=items.map(d=>{ const s=d.paid?{text:"Ödendi",cls:"good"}:dueStatus(daysUntil(d.dueDate)); return `<tr><td><label style="display:flex;align-items:center;gap:10px"><input class="paid-checkbox" type="checkbox" ${d.paid?"checked":""} onchange="toggleDebt('${d.id}')"><span class="pill ${s.cls}">${s.text}</span></label></td><td>${dateTR(d.dueDate)}</td><td><span class="table-title">${escapeHTML(d.name)}</span><span class="table-sub">${escapeHTML(d.note||"")}</span></td><td>${escapeHTML(d.receiver||"-")}</td><td>${escapeHTML(d.category||"-")}</td><td class="right accent"><strong>${money(d.amount)} TL</strong></td><td class="right"><button class="icon-btn" onclick="deleteItem('debts','${d.id}')">×</button></td></tr>`;}).join(""); }
+function toggleDebt(id){ const debts=read(STORE.debts); let tx=read(STORE.transactions); const d=debts.find(i=>i.id===id); if(!d)return; if(!d.paid){ d.paid=true; d.paidAt=today(); const tid=uid("txn"); d.linkedTransactionId=tid; tx.push({id:tid,type:"expense",desc:`Borç ödemesi: ${d.name}`,receiver:d.receiver,category:"Borç Ödemesi",account:d.account,amount:d.amount,date:today(),note:`Ödeme günü: ${dateTR(d.dueDate)}`,image:d.image||"",sourceDebtId:d.id,createdAt:new Date().toISOString()}); write(STORE.transactions,tx); toast("Borç ödendi ve gider olarak işlendi."); } else { d.paid=false; d.paidAt=null; if(d.linkedTransactionId){ tx=tx.filter(i=>i.id!==d.linkedTransactionId); write(STORE.transactions,tx); d.linkedTransactionId=null; } toast("Ödeme tiki kaldırıldı.","warn"); } write(STORE.debts,debts); updateUI(); }
+function renderBanks(){ const el=document.getElementById("bank-list"); if(!el)return; el.innerHTML=MY_BANKS.sort((a,b)=>(b.favorite-a.favorite)||a.bank.localeCompare(b.bank,"tr")).map(b=>{ const show=visibleIbans.has(b.id); return `<article class="bank-card ${b.favorite?"favorite":""}"><h4>${escapeHTML(b.bank)}</h4><small>${escapeHTML(b.account)} · ${escapeHTML(b.branch)}</small><div class="iban-line">${escapeHTML(show?formatIban(b.iban):maskIban(b.iban))}</div><small>${escapeHTML(b.owner)}</small><div class="bank-actions"><button onclick="copyIban('${b.id}')">Kopyala</button><button onclick="toggleIban('${b.id}')">${show?"Gizle":"Tam Göster"}</button></div></article>`;}).join(""); }
+function copyIban(id){ const b=MY_BANKS.find(x=>x.id===id); if(!b)return; copyText(formatIban(b.iban)); toast("IBAN kopyalandı."); }
+function toggleIban(id){ visibleIbans.has(id)?visibleIbans.delete(id):visibleIbans.add(id); renderBanks(); }
+function copyText(text){ if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(text);return} const t=document.createElement("textarea"); t.value=text; t.style.position="fixed"; t.style.left="-999px"; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
+function showImage(collection,id){ const list=collection==="debts"?read(STORE.debts):read(STORE.transactions); const item=list.find(i=>i.id===id); if(!item?.image)return; document.getElementById("modal-img").src=item.image; document.getElementById("image-modal").style.display="flex"; }
+function closeImageModal(e){ e.stopPropagation(); document.getElementById("image-modal").style.display="none"; document.getElementById("modal-img").src=""; }
+function deleteItem(collection,id){ if(!confirm("Bu kayıt silinsin mi?"))return; if(collection==="debts"){ const d=read(STORE.debts).find(i=>i.id===id); if(d?.linkedTransactionId) write(STORE.transactions,read(STORE.transactions).filter(i=>i.id!==d.linkedTransactionId)); write(STORE.debts,read(STORE.debts).filter(i=>i.id!==id)); } else { const tx=read(STORE.transactions).find(i=>i.id===id); write(STORE.transactions,read(STORE.transactions).filter(i=>i.id!==id)); if(tx?.sourceDebtId){ const debts=read(STORE.debts); const d=debts.find(i=>i.id===tx.sourceDebtId); if(d){d.paid=false;d.paidAt=null;d.linkedTransactionId=null;write(STORE.debts,debts);} } } updateUI(); toast("Kayıt silindi.","warn"); }
+function renderReports(){ const tx=read(STORE.transactions), ym=today().slice(0,7), month=tx.filter(i=>(i.date||"").startsWith(ym)); const inc=sum(month.filter(i=>i.type==="income")), exp=sum(month.filter(i=>i.type==="expense")), net=inc-exp; document.getElementById("month-income").textContent=money(inc); document.getElementById("month-expense").textContent=money(exp); const netEl=document.getElementById("month-net"); netEl.textContent=money(net); netEl.className=net>=0?"positive":"negative"; const expenses=tx.filter(i=>i.type==="expense"); const grouped={}; expenses.forEach(i=>grouped[i.category||"Diğer"]=(grouped[i.category||"Diğer"]||0)+Number(i.amount||0)); const rows=Object.entries(grouped).sort((a,b)=>b[1]-a[1]); const el=document.getElementById("category-report"); if(!rows.length){el.innerHTML='<div class="empty">Rapor için gider kaydı yok.</div>';return} const max=rows[0][1]||1; el.innerHTML=rows.map(([k,v])=>`<div class="report-row"><div class="report-row-top"><strong>${escapeHTML(k)}</strong><span>${money(v)} TL</span></div><div class="report-bar"><div class="report-fill" style="width:${Math.max(4,Math.round(v/max*100))}%"></div></div></div>`).join(""); }
+function exportData(){ const data={app:"Studio Finans",version:3,exportedAt:new Date().toISOString(),transactions:read(STORE.transactions),debts:read(STORE.debts)}; const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=`studio-finans-yedek-${today()}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); toast("Yedek indirildi."); }
+function importData(e){ const file=e.target.files[0]; if(!file)return; const r=new FileReader(); r.onload=()=>{ try{ const data=JSON.parse(r.result); if(!confirm("Yedek yüklensin mi? Mevcut kayıtların üzerine yazılır."))return; write(STORE.transactions,Array.isArray(data.transactions)?data.transactions:[]); write(STORE.debts,Array.isArray(data.debts)?data.debts:[]); updateUI(); toast("Yedek yüklendi."); }catch{toast("Yedek okunamadı.","bad");} finally{e.target.value="";} }; r.readAsText(file); }
+function clearAllData(){ if(confirm("Tüm kayıtları silmek istediğine emin misin?")&&confirm("Son onay: Bu işlem geri alınamaz.")){ localStorage.removeItem(STORE.transactions); localStorage.removeItem(STORE.debts); updateUI(); toast("Tüm kayıtlar silindi.","warn"); } }
+function migrateOldData(){ if(!localStorage.getItem(STORE.transactions)&&localStorage.getItem("transactions")){ try{ const old=JSON.parse(localStorage.getItem("transactions")||"[]"); write(STORE.transactions,old.map(i=>({id:String(i.id||uid("txn")),type:i.type==="advance"?"income":i.type,desc:i.desc||"Eski kayıt",receiver:i.receiver||"",category:i.category||"Diğer",account:i.account||"Nakit",amount:Number(i.amount)||0,date:i.date||today(),note:i.note||"",image:i.image||"",sourceDebtId:null,createdAt:new Date().toISOString()}))); }catch{} } if(!localStorage.getItem(STORE.debts)&&localStorage.getItem("debts")){ try{ const old=JSON.parse(localStorage.getItem("debts")||"[]"); write(STORE.debts,old.map(i=>({id:String(i.id||uid("debt")),name:i.name||i.desc||"Eski borç",receiver:i.receiver||"",category:i.category||"Diğer",account:i.account||"Nakit",amount:Number(i.amount)||0,dueDate:i.dueDate||i.date||today(),paid:Boolean(i.paid||i.isPaid),paidAt:i.paidAt||null,linkedTransactionId:null,note:i.note||"",image:i.image||"",createdAt:new Date().toISOString()}))); }catch{} } }
+function toast(msg,type="good"){ const el=document.getElementById("toast"); clearTimeout(toastTimer); el.textContent=msg; el.className=`toast show ${type}`; toastTimer=setTimeout(()=>el.className="toast",2400); }
