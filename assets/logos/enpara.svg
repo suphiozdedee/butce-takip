@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="72" viewBox="0 0 240 72" role="img" aria-label="Enpara">
+  <rect width="240" height="72" rx="16" fill="#180b1f"/>
+  <rect x="1" y="1" width="238" height="70" rx="15" fill="none" stroke="rgba(255,255,255,.18)"/>
+  <text x="120" y="43" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800" fill="#d8a2ff">Enpara</text>
+</svg>

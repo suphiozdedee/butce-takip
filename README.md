@@ -1,24 +1,36 @@
-# 📐 Studio Finans | Mimar Harcama & Avans Takip Paneli
+# Suphi Finance — Premium Finans Paneli
 
-İç mimari projelerde finansal akışı, şirket avanslarını ve kişisel harcamaları yönetmek için tasarlanmış minimalist bir takip arayüzüdür.
+Bu paket tek sayfalık, bağımsız çalışan bir HTML/CSS/JS finans panelidir. Kurulum gerektirmez.
 
-## ✨ Özellikler
-- **Güvenli Giriş:** Kişisel anahtar şifre ile erişim kontrolü.
-- **Avans Yönetimi:** Şirketten alınan avansların ve bu avanslarla yapılan harcamaların net bakiyesi.
-- **Harcama Detayı:** Harcamanın hangi kaynakla (Şirket/Kişisel) ve hangi yöntemle (Nakit/Kart) yapıldığının takibi.
-- **Dijital Arşiv:** Fiş ve dekont fotoğraflarını işlem satırına ekleme ve önizleme.
-- **Borç Takvimi:** Vadesi gelen ödemeler için görsel uyarı sistemi.
+## Nasıl çalıştırılır?
 
-## 🛠 Teknik Detaylar
-- **Frontend:** HTML5, CSS3 (Architectural UI), JavaScript (ES6+).
-- **Veri Saklama:** Tarayıcı tabanlı `localStorage`. Verileriniz cihazınızda kalır.
-- **Yayın:** GitHub Pages uyumlu.
+1. ZIP dosyasını çıkar.
+2. `index.html` dosyasını çift tıkla.
+3. Tarayıcıda açılır.
 
-## 🚀 Kurulum ve Yayına Alma
-1. Bu repository'yi fork'layın veya dosyaları kendi alanınıza yükleyin.
-2. `script.js` içerisindeki `APP_PASSWORD` değişkenini kendinize göre güncelleyin.
-3. GitHub Ayarlarından (**Settings > Pages**) `main` branch'ini seçerek yayına alın.
-4. Size verilen URL üzerinden her yerden erişin!
+## Ana mantık
 
----
-*Bu proje bir iç mimarın şantiye ve ofis arasındaki finansal köprüsünü kurmak için geliştirilmiştir.*
+- **Kasa / Net Nakit:** Sadece vadesiz hesaplardaki gerçek para.
+- **Kredi kartları:** Kart borcu ve kullanılabilir limit ayrı takip edilir. Kasaya eklenmez.
+- **Krediler:** Kredi borcu ayrı yükümlülük olarak durur.
+- **Minimum ödeme:** Kart minimumları + kredi taksitleri + sabit giderler ile hesaplanır.
+- **Sabit giderler:** Her ay 1–5 arası ödeme aralığında görünür. Tutarlar sonradan güncellenebilir.
+- **Tarih:** Yeni işlem eklerken tarih otomatik bugünün tarihi gelir. Geçmiş tarih girmek manuel yapılır.
+
+## Logo notu
+
+`assets/logos` içindeki SVG dosyaları logo slotu/yer tutucu olarak hazırlandı. Bankaların resmi marka dosyalarını kullanmak istersen aynı dosya isimleriyle değiştir:
+
+- `garanti-bbva.svg`
+- `yapi-kredi.svg`
+- `enpara.svg`
+- `visa.svg`
+- `mastercard.svg`
+
+## Veri saklama
+
+Veriler tarayıcının `localStorage` alanında saklanır. Başka cihazla otomatik senkronize olmaz.
+
+## Sıfırlama
+
+Panelin üstündeki `↺` butonu demo verileri sıfırlar.
