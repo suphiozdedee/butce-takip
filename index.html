@@ -3,11 +3,1289 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Suphi Finance — Premium Finans Paneli</title>
-  <link rel="stylesheet" href="./styles.css" />
+  <title>Suphi Finance</title>
+
+  <style>
+    :root {
+      --bg: #080c14;
+      --panel: #111722;
+      --panel-soft: #151c29;
+      --line: rgba(255,255,255,.10);
+      --line-strong: rgba(255,255,255,.16);
+      --text: #f7f8fc;
+      --soft: #cdd3e1;
+      --muted: #97a1b7;
+      --green: #52d59c;
+      --yellow: #e8b661;
+      --red: #ff6b78;
+      --blue: #8fb7ff;
+      --radius: 16px;
+      --shadow: 0 24px 70px rgba(0,0,0,.32);
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font);
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(143,183,255,.14), transparent 32%),
+        radial-gradient(circle at 80% 10%, rgba(82,213,156,.09), transparent 28%),
+        linear-gradient(135deg, #080c14 0%, #0c111b 48%, #080a10 100%);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    h1,
+    h2,
+    p {
+      margin: 0;
+    }
+
+    .app {
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 22px 0 50px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 14px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 16px;
+      margin-bottom: 18px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(13,18,28,.78);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 16px 60px rgba(0,0,0,.24);
+    }
+
+    .eyebrow {
+      margin: 0 0 5px;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: 26px;
+      letter-spacing: -.05em;
+    }
+
+    .date-text {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .primary-btn,
+    .ghost-btn,
+    .icon-btn {
+      border: 0;
+      border-radius: 12px;
+    }
+
+    .primary-btn {
+      padding: 12px 16px;
+      color: #08100d;
+      font-weight: 800;
+      background: linear-gradient(135deg, #f9fbff 0%, #9ec2ff 48%, #5de2aa 100%);
+    }
+
+    .ghost-btn {
+      padding: 12px 14px;
+      color: var(--text);
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+    }
+
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      color: var(--text);
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      font-size: 24px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .hero-card,
+    .mini-card,
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.035));
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card,
+    .mini-card {
+      padding: 20px;
+    }
+
+    .hero-card {
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .hero-card strong {
+      font-size: clamp(42px, 7vw, 66px);
+      line-height: .95;
+      letter-spacing: -.07em;
+    }
+
+    .mini-card strong {
+      display: block;
+      margin: 16px 0 10px;
+      font-size: 30px;
+      letter-spacing: -.06em;
+    }
+
+    small,
+    .panel p {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .panel {
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .panel-head {
+      padding: 18px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.025);
+    }
+
+    .panel h2 {
+      font-size: 20px;
+      letter-spacing: -.04em;
+      margin-bottom: 5px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      text-align: left;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .11em;
+    }
+
+    td {
+      color: var(--soft);
+      font-size: 14px;
+    }
+
+    td strong {
+      color: var(--text);
+    }
+
+    .money {
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .list {
+      display: grid;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 16px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+
+    .row:last-child {
+      border-bottom: 0;
+    }
+
+    .row-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .bank-chip {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: -.04em;
+      border: 1px solid var(--line-strong);
+      background: #1a2332;
+      flex: 0 0 auto;
+    }
+
+    .bank-chip.garanti {
+      background: linear-gradient(145deg, #12251f, #17211e);
+      color: #61e6b2;
+    }
+
+    .bank-chip.yapikredi {
+      background: linear-gradient(145deg, #111d32, #151d2b);
+      color: #9ec2ff;
+    }
+
+    .bank-chip.enpara {
+      background: linear-gradient(145deg, #241329, #1d1724);
+      color: #e1adff;
+    }
+
+    .bank-chip.fixed {
+      background: linear-gradient(145deg, #29231a, #1d1a15);
+      color: #e8b661;
+    }
+
+    .row-text {
+      min-width: 0;
+    }
+
+    .row-text strong {
+      display: block;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .row-text span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .row-value {
+      text-align: right;
+    }
+
+    .row-value strong {
+      display: block;
+      font-size: 17px;
+    }
+
+    .row-value span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid var(--line);
+      color: var(--soft);
+      background: rgba(255,255,255,.055);
+    }
+
+    .badge.good {
+      color: var(--green);
+      border-color: rgba(82,213,156,.28);
+    }
+
+    .badge.warn {
+      color: var(--yellow);
+      border-color: rgba(232,182,97,.32);
+    }
+
+    .badge.bad {
+      color: var(--red);
+      border-color: rgba(255,107,120,.32);
+    }
+
+    .badge.blue {
+      color: var(--blue);
+      border-color: rgba(143,183,255,.32);
+    }
+
+    .inline-edit {
+      width: 110px;
+      padding: 8px 9px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      outline: none;
+      color: var(--text);
+      background: rgba(0,0,0,.22);
+      text-align: right;
+    }
+
+    input:focus,
+    select:focus,
+    .inline-edit:focus {
+      border-color: rgba(143,183,255,.55);
+      box-shadow: 0 0 0 4px rgba(143,183,255,.08);
+    }
+
+    .empty {
+      padding: 22px 18px;
+      color: var(--muted);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: none;
+      place-items: center;
+      padding: 18px;
+      background: rgba(0,0,0,.58);
+      backdrop-filter: blur(10px);
+    }
+
+    .modal-backdrop.open {
+      display: grid;
+    }
+
+    .modal {
+      width: min(720px, 100%);
+      border: 1px solid var(--line-strong);
+      border-radius: 20px;
+      background: #101722;
+      box-shadow: var(--shadow);
+    }
+
+    .modal-head {
+      padding: 18px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .form {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    label {
+      display: grid;
+      gap: 8px;
+      color: var(--soft);
+      font-size: 13px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      outline: none;
+      color: var(--text);
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.24);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 0 18px 18px;
+    }
+
+    @media (max-width: 900px) {
+      .summary,
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .top-actions {
+        width: 100%;
+      }
+
+      .top-actions button {
+        flex: 1;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .app {
+        width: min(100% - 18px, 1180px);
+        padding-top: 9px;
+      }
+
+      .form {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-card strong {
+        font-size: 42px;
+      }
+
+      .row {
+        grid-template-columns: 1fr;
+      }
+
+      .row-value {
+        text-align: left;
+        padding-left: 54px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-  <div id="app"></div>
-  <script src="./app.js"></script>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Suphi Finance</p>
+        <h1>Finans Özeti</h1>
+        <span id="todayText" class="date-text"></span>
+      </div>
+
+      <div class="top-actions">
+        <button class="ghost-btn" id="privacyBtn">Gizle</button>
+        <button class="primary-btn" onclick="openModal()">+ İşlem</button>
+      </div>
+    </header>
+
+    <section class="summary">
+      <article class="hero-card">
+        <span class="label">Kasa / Net Nakit</span>
+        <strong id="netCash">0 TL</strong>
+        <small>Sadece vadesiz hesaplar. Kart limiti ve borçlar dahil değil.</small>
+      </article>
+
+      <article class="mini-card">
+        <span class="label">Bu Ay Ödenecek</span>
+        <strong id="monthlyDue">0 TL</strong>
+        <small>Minimum kart ödemeleri + kredi taksitleri + sabit giderler.</small>
+      </article>
+
+      <article class="mini-card">
+        <span class="label">Kasa Farkı</span>
+        <strong id="cashGap">0 TL</strong>
+        <small>Bu ayki ödemelere göre kalan / eksik nakit.</small>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Ödeme Takvimi</h2>
+          <p>Tarih sıralı, tek ekranda takip.</p>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tarih</th>
+              <th>Ödeme</th>
+              <th>Tür</th>
+              <th>Minimum / Tutar</th>
+              <th>Tam Borç</th>
+              <th>Durum</th>
+            </tr>
+          </thead>
+          <tbody id="paymentRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Vadesiz Hesaplar</h2>
+            <p>Kasanı oluşturan gerçek para.</p>
+          </div>
+        </div>
+        <div id="cashRows" class="list"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Kredi Kartları</h2>
+            <p>Kullanılabilir limit nakit değildir.</p>
+          </div>
+        </div>
+        <div id="cardRows" class="list"></div>
+      </section>
+    </section>
+
+    <section class="grid-2">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Krediler</h2>
+            <p>Kredi taksitleri bu ay ödenecek hesaba girer.</p>
+          </div>
+        </div>
+        <div id="loanRows" class="list"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Sabit Giderler</h2>
+            <p>Her ay 1–5 arası. Fiyatları sonra güncelleyebilirsin.</p>
+          </div>
+        </div>
+        <div id="fixedRows" class="list"></div>
+      </section>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Son İşlemler</h2>
+          <p>Yeni işlemde tarih otomatik bugünün tarihi gelir. Geçmiş tarih manuel seçilir.</p>
+        </div>
+      </div>
+      <div id="transactionRows" class="list"></div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="modal">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <h2>İşlem Ekle</h2>
+          <p>Kredi kartı harcaması kasayı değiştirmez. Kart ödemesi kasadan düşer.</p>
+        </div>
+        <button class="icon-btn" onclick="closeModal()">×</button>
+      </div>
+
+      <div class="form">
+        <label>
+          İşlem Türü
+          <select id="txType" onchange="renderTargetSelect()">
+            <option value="cashExpense">Nakit / banka kartı harcaması</option>
+            <option value="cardExpense">Kredi kartı harcaması</option>
+            <option value="cardPayment">Kredi kartı ödemesi</option>
+            <option value="loanPayment">Kredi taksiti ödemesi</option>
+            <option value="income">Gelir girişi</option>
+            <option value="fixedPayment">Sabit gider ödemesi</option>
+          </select>
+        </label>
+
+        <label>
+          Tarih
+          <input id="txDate" type="date" />
+        </label>
+
+        <label>
+          Tutar
+          <input id="txAmount" type="number" min="0" step="1" placeholder="1000" />
+        </label>
+
+        <label>
+          Vadesiz Hesap
+          <select id="txCash"></select>
+        </label>
+
+        <label id="targetWrap" class="full"></label>
+
+        <label class="full">
+          Açıklama
+          <input id="txNote" placeholder="Örn: market, kart ödemesi, kira..." />
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button class="ghost-btn" onclick="closeModal()">Vazgeç</button>
+        <button class="primary-btn" onclick="saveTransaction()">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORE_KEY = "suphi_finance_clean_v2";
+
+    const defaultState = {
+      hidden: false,
+
+      cashAccounts: [
+        {
+          id: "garanti-cash",
+          bank: "garanti",
+          bankName: "Garanti BBVA",
+          account: "Vadesiz TL",
+          balance: 12199.18
+        },
+        {
+          id: "yapikredi-cash",
+          bank: "yapikredi",
+          bankName: "Yapı Kredi",
+          account: "Vadesiz TL",
+          balance: 145.92
+        },
+        {
+          id: "enpara-cash",
+          bank: "enpara",
+          bankName: "Enpara",
+          account: "Vadesiz TL",
+          balance: 0
+        }
+      ],
+
+      cards: [
+        {
+          id: "world",
+          bank: "yapikredi",
+          bankName: "Yapı Kredi",
+          name: "World Gold",
+          last4: "8221",
+          debt: 21741.35,
+          minimum: null,
+          availableLimit: 742.78,
+          limit: 22400,
+          dueDate: "2026-05-13"
+        },
+        {
+          id: "ms",
+          bank: "garanti",
+          bankName: "Garanti BBVA",
+          name: "M&S Platinum",
+          last4: "1018",
+          debt: 33866.09,
+          minimum: 7865,
+          availableLimit: 12.25,
+          limit: 45000,
+          dueDate: "2026-06-05"
+        },
+        {
+          id: "shopfly",
+          bank: "garanti",
+          bankName: "Garanti BBVA",
+          name: "Shop&Fly Business",
+          last4: "2010",
+          debt: 9094.47,
+          minimum: 1011,
+          availableLimit: 905.53,
+          limit: 10000,
+          dueDate: "2026-06-01"
+        }
+      ],
+
+      loans: [
+        {
+          id: "garanti-loan",
+          bank: "garanti",
+          bankName: "Garanti BBVA",
+          name: "İhtiyaç Kredisi",
+          remainingDebt: 36218.28,
+          installment: 18109.13,
+          dueDate: "2026-06-01"
+        },
+        {
+          id: "enpara-loan",
+          bank: "enpara",
+          bankName: "Enpara",
+          name: "Yapılandırma Kredisi",
+          remainingDebt: 94792.06,
+          installment: 15798.67,
+          dueDate: "2026-06-01"
+        }
+      ],
+
+      fixedExpenses: [
+        {
+          id: "rent",
+          name: "Kira",
+          amount: 0,
+          window: "Her ay 1–5",
+          paid: false
+        },
+        {
+          id: "internet",
+          name: "İnternet",
+          amount: 0,
+          window: "Her ay 1–5",
+          paid: false
+        },
+        {
+          id: "phone",
+          name: "Telefon",
+          amount: 0,
+          window: "Her ay 1–5",
+          paid: false
+        },
+        {
+          id: "subs",
+          name: "Abonelikler",
+          amount: 0,
+          window: "Her ay 1–5",
+          paid: false
+        },
+        {
+          id: "business",
+          name: "İş / Muhasebe",
+          amount: 0,
+          window: "Her ay 1–5",
+          paid: false
+        }
+      ],
+
+      transactions: []
+    };
+
+    let state = loadState();
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORE_KEY));
+        return saved ? { ...defaultState, ...saved } : structuredClone(defaultState);
+      } catch {
+        return structuredClone(defaultState);
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORE_KEY, JSON.stringify(state));
+    }
+
+    function money(value) {
+      if (state.hidden) return "•••••• TL";
+
+      return `${new Intl.NumberFormat("tr-TR", {
+        maximumFractionDigits: 0
+      }).format(Number(value || 0))} TL`;
+    }
+
+    function isoToday() {
+      const date = new Date();
+      date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+      return date.toISOString().slice(0, 10);
+    }
+
+    function prettyDate(iso) {
+      if (!iso) return "—";
+
+      return new Intl.DateTimeFormat("tr-TR", {
+        day: "numeric",
+        month: "long"
+      }).format(new Date(`${iso}T12:00:00`));
+    }
+
+    function longDate(iso) {
+      return new Intl.DateTimeFormat("tr-TR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric"
+      }).format(new Date(`${iso}T12:00:00`));
+    }
+
+    function daysUntil(iso) {
+      const today = new Date(`${isoToday()}T00:00:00`);
+      const target = new Date(`${iso}T00:00:00`);
+      return Math.ceil((target - today) / 86400000);
+    }
+
+    function badgeForDate(iso) {
+      const diff = daysUntil(iso);
+
+      if (diff < 0) return `<span class="badge bad">Gecikti</span>`;
+      if (diff === 0) return `<span class="badge bad">Bugün</span>`;
+      if (diff <= 3) return `<span class="badge warn">Kritik</span>`;
+      if (diff <= 7) return `<span class="badge blue">Yaklaşıyor</span>`;
+
+      return `<span class="badge good">Bekliyor</span>`;
+    }
+
+    function bankChip(bank, name) {
+      const shortName = {
+        garanti: "GB",
+        yapikredi: "YK",
+        enpara: "E"
+      }[bank] || name.slice(0, 2).toUpperCase();
+
+      return `<span class="bank-chip ${bank}">${shortName}</span>`;
+    }
+
+    function calc() {
+      const netCash = state.cashAccounts.reduce((sum, item) => {
+        return sum + Number(item.balance || 0);
+      }, 0);
+
+      const cardMinimum = state.cards.reduce((sum, item) => {
+        return sum + Number(item.minimum || 0);
+      }, 0);
+
+      const loanInstallments = state.loans.reduce((sum, item) => {
+        return sum + Number(item.installment || 0);
+      }, 0);
+
+      const fixedTotal = state.fixedExpenses.reduce((sum, item) => {
+        return sum + Number(item.amount || 0);
+      }, 0);
+
+      const monthlyDue = cardMinimum + loanInstallments + fixedTotal;
+
+      return {
+        netCash,
+        cardMinimum,
+        loanInstallments,
+        fixedTotal,
+        monthlyDue,
+        cashGap: netCash - monthlyDue
+      };
+    }
+
+    function paymentCalendar() {
+      const cards = state.cards.map(item => ({
+        date: item.dueDate,
+        title: `${item.bankName} · ${item.name}`,
+        type: "Kart",
+        min: item.minimum,
+        full: item.debt,
+        status: badgeForDate(item.dueDate)
+      }));
+
+      const loans = state.loans.map(item => ({
+        date: item.dueDate,
+        title: `${item.bankName} · ${item.name}`,
+        type: "Kredi",
+        min: item.installment,
+        full: item.installment,
+        status: badgeForDate(item.dueDate)
+      }));
+
+      const fixed = state.fixedExpenses.map(item => ({
+        date: "0000-00-00",
+        title: item.name,
+        type: "Sabit Gider",
+        min: item.amount,
+        full: item.amount,
+        status: item.paid
+          ? `<span class="badge good">Ödendi</span>`
+          : `<span class="badge warn">1–5 arası</span>`,
+        fixedWindow: item.window
+      }));
+
+      return [...cards, ...loans, ...fixed].sort((a, b) => {
+        if (a.date === "0000-00-00") return 1;
+        if (b.date === "0000-00-00") return -1;
+        return new Date(a.date) - new Date(b.date);
+      });
+    }
+
+    function render() {
+      const totals = calc();
+
+      document.getElementById("todayText").textContent = `Bugün: ${longDate(isoToday())}`;
+      document.getElementById("netCash").textContent = money(totals.netCash);
+      document.getElementById("monthlyDue").textContent = money(totals.monthlyDue);
+      document.getElementById("cashGap").textContent = money(totals.cashGap);
+      document.getElementById("cashGap").style.color = totals.cashGap >= 0 ? "var(--green)" : "var(--red)";
+      document.getElementById("privacyBtn").textContent = state.hidden ? "Göster" : "Gizle";
+
+      renderPayments();
+      renderCashAccounts();
+      renderCards();
+      renderLoans();
+      renderFixedExpenses();
+      renderTransactions();
+      fillCashSelect();
+    }
+
+    function renderPayments() {
+      document.getElementById("paymentRows").innerHTML = paymentCalendar().map(item => `
+        <tr>
+          <td>${item.fixedWindow || prettyDate(item.date)}</td>
+          <td><strong>${item.title}</strong></td>
+          <td>${item.type}</td>
+          <td>
+            ${
+              item.min == null
+                ? `<span class="badge bad">Girilmedi</span>`
+                : `<span class="money">${money(item.min)}</span>`
+            }
+          </td>
+          <td><span class="money">${money(item.full)}</span></td>
+          <td>${item.status}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderCashAccounts() {
+      document.getElementById("cashRows").innerHTML = state.cashAccounts.map(item => `
+        <div class="row">
+          <div class="row-title">
+            ${bankChip(item.bank, item.bankName)}
+            <div class="row-text">
+              <strong>${item.bankName}</strong>
+              <span>${item.account}</span>
+            </div>
+          </div>
+          <div class="row-value">
+            <strong>${money(item.balance)}</strong>
+            <span>Kullanılabilir bakiye</span>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderCards() {
+      document.getElementById("cardRows").innerHTML = state.cards.map(item => `
+        <div class="row">
+          <div class="row-title">
+            ${bankChip(item.bank, item.bankName)}
+            <div class="row-text">
+              <strong>${item.name}</strong>
+              <span>${item.bankName} · **** ${item.last4}</span>
+            </div>
+          </div>
+          <div class="row-value">
+            <strong>${money(item.debt)}</strong>
+            <span>
+              Min: ${item.minimum == null ? "Girilmedi" : money(item.minimum)}
+              · Kul. limit: ${money(item.availableLimit)}
+            </span>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderLoans() {
+      document.getElementById("loanRows").innerHTML = state.loans.map(item => `
+        <div class="row">
+          <div class="row-title">
+            ${bankChip(item.bank, item.bankName)}
+            <div class="row-text">
+              <strong>${item.name}</strong>
+              <span>${item.bankName} · Sonraki ödeme: ${prettyDate(item.dueDate)}</span>
+            </div>
+          </div>
+          <div class="row-value">
+            <strong>${money(item.remainingDebt)}</strong>
+            <span>Taksit: ${money(item.installment)}</span>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderFixedExpenses() {
+      document.getElementById("fixedRows").innerHTML = state.fixedExpenses.map(item => `
+        <div class="row">
+          <div class="row-title">
+            <span class="bank-chip fixed">SG</span>
+            <div class="row-text">
+              <strong>${item.name}</strong>
+              <span>${item.window}</span>
+            </div>
+          </div>
+          <div class="row-value">
+            <input
+              class="inline-edit"
+              type="number"
+              min="0"
+              step="1"
+              value="${Math.round(item.amount)}"
+              onchange="updateFixedAmount('${item.id}', this.value)"
+            />
+            <span>${item.paid ? "Ödendi" : "Bekliyor"}</span>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderTransactions() {
+      const target = document.getElementById("transactionRows");
+
+      if (!state.transactions.length) {
+        target.innerHTML = `<div class="empty">Henüz işlem yok.</div>`;
+        return;
+      }
+
+      target.innerHTML = state.transactions.slice(0, 8).map(item => `
+        <div class="row">
+          <div class="row-title">
+            <span class="bank-chip">İŞ</span>
+            <div class="row-text">
+              <strong>${item.title}</strong>
+              <span>${prettyDate(item.date)} · ${item.type}</span>
+            </div>
+          </div>
+          <div class="row-value">
+            <strong>${money(item.amount)}</strong>
+            <span>${item.note || "—"}</span>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function updateFixedAmount(id, value) {
+      const item = state.fixedExpenses.find(expense => expense.id === id);
+      if (!item) return;
+
+      item.amount = Number(value || 0);
+      saveState();
+      render();
+    }
+
+    document.getElementById("privacyBtn").addEventListener("click", () => {
+      state.hidden = !state.hidden;
+      saveState();
+      render();
+    });
+
+    function openModal() {
+      document.getElementById("txDate").value = isoToday();
+      document.getElementById("txAmount").value = "";
+      document.getElementById("txNote").value = "";
+
+      fillCashSelect();
+      renderTargetSelect();
+
+      document.getElementById("modal").classList.add("open");
+    }
+
+    function closeModal() {
+      document.getElementById("modal").classList.remove("open");
+    }
+
+    function fillCashSelect() {
+      const select = document.getElementById("txCash");
+      if (!select) return;
+
+      select.innerHTML = state.cashAccounts.map(item => `
+        <option value="${item.id}">${item.bankName} · ${item.account}</option>
+      `).join("");
+    }
+
+    function renderTargetSelect() {
+      const type = document.getElementById("txType").value;
+      const wrap = document.getElementById("targetWrap");
+
+      if (type === "cardExpense" || type === "cardPayment") {
+        wrap.innerHTML = `
+          Kart
+          <select id="txTarget">
+            ${state.cards.map(item => `
+              <option value="${item.id}">${item.bankName} · ${item.name}</option>
+            `).join("")}
+          </select>
+        `;
+        return;
+      }
+
+      if (type === "loanPayment") {
+        wrap.innerHTML = `
+          Kredi
+          <select id="txTarget">
+            ${state.loans.map(item => `
+              <option value="${item.id}">${item.bankName} · ${item.name}</option>
+            `).join("")}
+          </select>
+        `;
+        return;
+      }
+
+      if (type === "fixedPayment") {
+        wrap.innerHTML = `
+          Sabit Gider
+          <select id="txTarget">
+            ${state.fixedExpenses.map(item => `
+              <option value="${item.id}">${item.name}</option>
+            `).join("")}
+          </select>
+        `;
+        return;
+      }
+
+      wrap.innerHTML = `
+        Kasa Etkisi
+        <input disabled value="${type === "income" ? "Kasa artar" : "Kasa azalır"}" />
+      `;
+    }
+
+    function saveTransaction() {
+      const type = document.getElementById("txType").value;
+      const date = document.getElementById("txDate").value || isoToday();
+      const amount = Number(document.getElementById("txAmount").value || 0);
+      const note = document.getElementById("txNote").value.trim();
+      const cashId = document.getElementById("txCash").value;
+      const targetId = document.getElementById("txTarget")?.value;
+
+      if (amount <= 0) {
+        alert("Tutar girmen gerekiyor.");
+        return;
+      }
+
+      const cash = state.cashAccounts.find(item => item.id === cashId);
+
+      let title = note || "İşlem";
+      let typeText = "İşlem";
+
+      if (type === "cashExpense") {
+        if (cash) cash.balance -= amount;
+        typeText = "Nakit / banka kartı harcaması";
+      }
+
+      if (type === "income") {
+        if (cash) cash.balance += amount;
+        typeText = "Gelir girişi";
+      }
+
+      if (type === "cardExpense") {
+        const card = state.cards.find(item => item.id === targetId);
+
+        if (card) {
+          card.debt += amount;
+          card.availableLimit = Math.max(0, card.availableLimit - amount);
+          title = note || `${card.name} harcaması`;
+        }
+
+        typeText = "Kredi kartı harcaması";
+      }
+
+      if (type === "cardPayment") {
+        const card = state.cards.find(item => item.id === targetId);
+
+        if (cash) cash.balance -= amount;
+
+        if (card) {
+          card.debt = Math.max(0, card.debt - amount);
+          card.availableLimit = Math.min(card.limit, card.availableLimit + amount);
+
+          if (card.minimum != null) {
+            card.minimum = Math.max(0, card.minimum - amount);
+          }
+
+          title = note || `${card.name} ödemesi`;
+        }
+
+        typeText = "Kredi kartı ödemesi";
+      }
+
+      if (type === "loanPayment") {
+        const loan = state.loans.find(item => item.id === targetId);
+
+        if (cash) cash.balance -= amount;
+
+        if (loan) {
+          loan.remainingDebt = Math.max(0, loan.remainingDebt - amount);
+          title = note || `${loan.name} ödemesi`;
+        }
+
+        typeText = "Kredi taksiti ödemesi";
+      }
+
+      if (type === "fixedPayment") {
+        const fixed = state.fixedExpenses.find(item => item.id === targetId);
+
+        if (cash) cash.balance -= amount;
+
+        if (fixed) {
+          fixed.amount = amount;
+          fixed.paid = true;
+          title = note || `${fixed.name} ödemesi`;
+        }
+
+        typeText = "Sabit gider ödemesi";
+      }
+
+      state.transactions.unshift({
+        id: crypto.randomUUID(),
+        date,
+        type: typeText,
+        title,
+        amount,
+        note
+      });
+
+      saveState();
+      closeModal();
+      render();
+    }
+
+    render();
+  </script>
 </body>
 </html>
